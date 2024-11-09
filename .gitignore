@@ -1,0 +1,10 @@
+build
+install
+log
+*.pyc
+.vscode
+*.db3
+metadata.yaml
+*.csv
+rosbag2_*
+*.asv
