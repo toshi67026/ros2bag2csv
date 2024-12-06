@@ -59,10 +59,10 @@ def main() -> None:
     # Create reader instance and open for reading.
     df = pd.DataFrame()
     with AnyReader([bagfile_path], default_typestore=typestore) as reader:
-        for topic_name in track(target_topic):
-            connections = [x for x in reader.connections if x.topic == topic_name]
+        for topic in track(target_topic):
+            connections = [x for x in reader.connections if x.topic == topic]
             if len(connections) == 0:
-                print(f"topic not found: {topic_name}, skip this topic")
+                print(f"topic not found: {topic}, skip this topic")
                 continue
             for connection, timestamp, rawdata in reader.messages(connections=connections):
                 msg = reader.deserialize(rawdata, connection.msgtype)
@@ -72,28 +72,31 @@ def main() -> None:
 
                 # siwtch by msg type
                 if msg_type == "std_msgs/msg/Bool":
-                    df_add = pd.DataFrame(time_dict | parse_bool(msg, topic_name), index=[0])
+                    df_add = pd.DataFrame(time_dict | parse_bool(msg, topic), index=[0])
                     df = pd.concat([df, df_add], ignore_index=True)
                 elif msg_type == "geometry_msgs/msg/Vector3":
-                    df_add = pd.DataFrame(time_dict | parse_vector3(msg, topic_name), index=[0])
+                    df_add = pd.DataFrame(time_dict | parse_vector3(msg, topic), index=[0])
                     df = pd.concat([df, df_add], ignore_index=True)
                 elif msg_type == "geometry_msgs/msg/Point":
-                    df_add = pd.DataFrame(time_dict | parse_point(msg, topic_name), index=[0])
+                    df_add = pd.DataFrame(time_dict | parse_point(msg, topic), index=[0])
                     df = pd.concat([df, df_add], ignore_index=True)
                 elif msg_type == "std_msgs/msg/Float32":
-                    df_add = pd.DataFrame(time_dict | parse_float32(msg, topic_name), index=[0])
+                    df_add = pd.DataFrame(time_dict | parse_float32(msg, topic), index=[0])
                     df = pd.concat([df, df_add], ignore_index=True)
                 elif msg_type == "std_msgs/msg/Float32MultiArray":
-                    df_add = pd.DataFrame(time_dict | parse_float32_multiarray(msg, topic_name), index=[0])
+                    df_add = pd.DataFrame(time_dict | parse_float32_multiarray(msg, topic), index=[0])
+                    df = pd.concat([df, df_add], ignore_index=True)
+                elif msg_type == "geometry_msgs/msg/Twist":
+                    df_add = pd.DataFrame(time_dict | parse_twist(msg, topic), index=[0])
                     df = pd.concat([df, df_add], ignore_index=True)
                 elif msg_type == "geometry_msgs/msg/Pose":
-                    df_add = pd.DataFrame(time_dict | parse_pose(msg, topic_name), index=[0])
+                    df_add = pd.DataFrame(time_dict | parse_pose(msg, topic), index=[0])
                     df = pd.concat([df, df_add], ignore_index=True)
                 elif msg_type == "geometry_msgs/msg/PoseStamped":
-                    df_add = pd.DataFrame(time_dict | parse_pose_stamped(msg, topic_name), index=[0])
+                    df_add = pd.DataFrame(time_dict | parse_pose_stamped(msg, topic), index=[0])
                     df = pd.concat([df, df_add], ignore_index=True)
                 else:
-                    print(f"unsupported msg type: {msg_type}, topic: {topic_name}")
+                    print(f"unsupported msg type: {msg_type}, topic: {topic}")
 
     # convert to csv
     print(df.head())

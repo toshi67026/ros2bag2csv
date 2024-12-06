@@ -120,24 +120,30 @@ def parse_quaternion_as_euler(msg, topic: str) -> dict:
         f"{topic}yaw": yaw,
     }
 
+def parse_twist(msg, topic: str) -> dict:
+    """Parse Twist message into dictionary format"""
+    return (
+        parse_vector3(msg.linear, f"{topic}/linear")
+        | parse_vector3(msg.angular, f"{topic}/angular")
+    )
 
-def parse_pose(msg, topic_name: str) -> dict:
+def parse_pose(msg, topic: str) -> dict:
     """Parse Pose message into dictionary format
 
     Combines position, orientation (both quaternion and euler) data
     """
     return (
-        parse_point(msg.position, f"{topic_name}/position")
-        | parse_quaternion(msg.orientation, f"{topic_name}/orientation")
-        | parse_quaternion_as_euler(msg.orientation, f"{topic_name}/euler")
+        parse_point(msg.position, f"{topic}/position")
+        | parse_quaternion(msg.orientation, f"{topic}/orientation")
+        | parse_quaternion_as_euler(msg.orientation, f"{topic}/euler")
     )
 
 
-def parse_pose_stamped(msg, topic_name: str) -> dict:
+def parse_pose_stamped(msg, topic: str) -> dict:
     """Parse PoseStamped message into dictionary format
 
     Combines header and pose data
     """
-    return parse_header(msg.header, f"{topic_name}/header") | parse_pose(
-        msg.pose, f"{topic_name}/pose"
+    return parse_header(msg.header, f"{topic}/header") | parse_pose(
+        msg.pose, f"{topic}/pose"
     )
