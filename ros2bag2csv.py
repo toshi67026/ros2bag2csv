@@ -45,14 +45,20 @@ def main() -> None:
     # add custom messages
     typestore = get_typestore(Stores.ROS2_HUMBLE)
     add_types = {}
+    """
+    # --- Custom Message Support ---
+    # Uncomment the block below to register your custom message types.
+    # Be aware that you will also need to implement a corresponding message parser in msg_parser.py
+    # and adjust the message names accordingly.
 
-    path_info_msgs_pkg = Path(get_package_share_directory("path_info_msgs"))
-    custom_msgs_list = list((path_info_msgs_pkg.joinpath("msg")).glob("*.msg"))
+    your_custom_msgs_pkg = Path(get_package_share_directory("your_custom_msgs"))
+    custom_msgs_list = list((your_custom_msgs_pkg.joinpath("msg")).glob("*.msg"))
 
     for pathstr in custom_msgs_list:
         custom_msg_path = Path(pathstr)
         msgdef = custom_msg_path.read_text(encoding="utf-8")
         add_types.update(get_types_from_msg(msgdef, guess_msgtype(custom_msg_path)))
+    """
 
     typestore.register(add_types)
 
